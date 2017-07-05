@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import mx.ucol.models.Employee;
 
+/**
+ * 
+ * @author CarlosFco
+ */
+
 public class EmployeesController implements Controller<Employee>
 {
     @Override

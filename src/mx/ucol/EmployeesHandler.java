@@ -4,21 +4,22 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.channels.SeekableByteChannel;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mx.ucol.controllers.EmployeesController;
 import mx.ucol.models.Employee;
 
-public class EmployeesHandler implements HttpHandler{
+/**
+ * 
+ * @author CarlosFco
+ */
 
+public class EmployeesHandler implements HttpHandler
+{
     @Override
-    public void handle(HttpExchange packet) {
+    public void handle(HttpExchange packet)
+    {
         String requestMethod = packet.getRequestMethod();
         String context = packet.getRequestURI().toString();
         EmployeesController controller = new EmployeesController();
@@ -50,6 +51,9 @@ public class EmployeesHandler implements HttpHandler{
         
         Employee temp;
         
+        System.out.println("Method: " + packet.getRequestMethod());
+        System.out.println(context + "\n");
+
         if(requestMethod.equalsIgnoreCase("get"))
         {
             if(contextArray.length == 2)
@@ -64,7 +68,7 @@ public class EmployeesHandler implements HttpHandler{
                     temp = controller.getById(id);
                     System.out.println("Name: " + temp.getName());
                     
-                } catch (Exception e)
+                } catch (NumberFormatException e)
                 {
                     System.err.println(e.getMessage());
                 }
@@ -78,22 +82,15 @@ public class EmployeesHandler implements HttpHandler{
                 InputStreamReader isr = new InputStreamReader(packet.getRequestBody(), "utf-8");
                 BufferedReader buffer = new BufferedReader(isr);
                 String value = buffer.readLine();
-                
+                System.out.println(value);
             } catch (IOException ex) {
                 System.err.println(ex.getMessage());
             }
+            controller.create(new Employee(4, "Cuatro"));
         }
-        else if(contextArray.length == 3 && requestMethod.equalsIgnoreCase("put"))
+        else if(requestMethod.equalsIgnoreCase("put"))
         {
-            try
-            {
-                InputStreamReader isr = new InputStreamReader(packet.getRequestBody(), "utf-8");
-                BufferedReader buffer = new BufferedReader(isr);
-                String value = buffer.readLine();
-                
-            } catch (IOException ex) {
-                System.err.println(ex.getMessage());
-            }
+            controller.update(new Employee(4, "Cuatro"));
         }
         else if(requestMethod.equalsIgnoreCase("delete"))
         {
@@ -102,14 +99,15 @@ public class EmployeesHandler implements HttpHandler{
         
         String response = "OK";
         
-        try {
+        try
+        {
             packet.sendResponseHeaders(200, 0);
-            OutputStream out = packet.getResponseBody();
-            out.write(response.getBytes());
-            out.close();
-        } catch (Exception e) {
+            try (OutputStream out = packet.getResponseBody())
+            {
+                out.write(response.getBytes());
+            }
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
-    
 }
