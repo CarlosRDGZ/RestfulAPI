@@ -1,14 +1,13 @@
 package mx.ucol;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.List;
 import mx.ucol.controllers.EmployeesController;
 import mx.ucol.models.Employee;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -23,9 +22,8 @@ public class EmployeesHandler implements HttpHandler
         String requestMethod = packet.getRequestMethod();
         String context = packet.getRequestURI().toString();
         EmployeesController controller = new EmployeesController();
-        List<Employee> employees;
-        
         String[] contextArray = context.split("/");
+        String response = "OK";
         
         /*
         
@@ -49,6 +47,8 @@ public class EmployeesHandler implements HttpHandler
         
         */
         
+        ObjectMapper mapper = new ObjectMapper();
+        
         Employee temp;
         
         System.out.println("Method: " + packet.getRequestMethod());
@@ -58,18 +58,20 @@ public class EmployeesHandler implements HttpHandler
         {
             if(contextArray.length == 2)
             {
-                employees = controller.getAll();
+                try
+                {
+                    response = mapper.writeValueAsString(controller.getAll());
+                } catch (JsonProcessingException e) {
+                    System.err.println(e.getMessage());
+                }
             }
             else if(contextArray.length == 3)
             {
                 try
                 {
-                    int id = Integer.parseInt(contextArray[2]);
-                    temp = controller.getById(id);
-                    System.out.println("Name: " + temp.getName());
+                    response = mapper.writeValueAsString(controller.getById(Integer.parseInt(contextArray[2])));
                     
-                } catch (NumberFormatException e)
-                {
+                } catch (NumberFormatException | JsonProcessingException e) {
                     System.err.println(e.getMessage());
                 }
                 
@@ -79,25 +81,26 @@ public class EmployeesHandler implements HttpHandler
         {
             try
             {
-                InputStreamReader isr = new InputStreamReader(packet.getRequestBody(), "utf-8");
-                BufferedReader buffer = new BufferedReader(isr);
-                String value = buffer.readLine();
-                System.out.println(value);
+                controller.create(mapper.readValue(packet.getRequestBody(), Employee.class));
+                response = "Employee created";
             } catch (IOException ex) {
                 System.err.println(ex.getMessage());
             }
-            controller.create(new Employee(4, "Cuatro"));
         }
         else if(requestMethod.equalsIgnoreCase("put"))
         {
-            controller.update(new Employee(4, "Cuatro"));
+            try
+            {
+                controller.update(mapper.readValue(packet.getRequestBody(), Employee.class));
+                response = "Employee update";
+            } catch (IOException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
         else if(requestMethod.equalsIgnoreCase("delete"))
         {
             controller.delete(1);
         }
-        
-        String response = "OK";
         
         try
         {
