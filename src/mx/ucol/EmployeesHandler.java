@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author CarlosFco
  */
-
 public class EmployeesHandler implements HttpHandler
 {
     @Override
@@ -25,32 +24,8 @@ public class EmployeesHandler implements HttpHandler
         String[] contextArray = context.split("/");
         String response = "OK";
         
-        /*
-        
-        Obtener todos los registros
-        GET /employees
-        
-        
-        Obtener registro por id
-        GET /employees/:id
-        
-        Crear un registro
-        POST /employees
-        
-        {"id":6, "name":"Nombre"}
-        
-        Actualizar un registro
-        PUT /employees/:id
-        
-        Borrar registro
-        DELETE /employees/:id
-        
-        */
-        
         ObjectMapper mapper = new ObjectMapper();
-        
-        Employee temp;
-        
+                
         System.out.println("Method: " + packet.getRequestMethod());
         System.out.println(context + "\n");
 
@@ -69,7 +44,11 @@ public class EmployeesHandler implements HttpHandler
             {
                 try
                 {
-                    response = mapper.writeValueAsString(controller.getById(Integer.parseInt(contextArray[2])));
+                    Employee employee = controller.getById(Integer.parseInt(contextArray[2]));
+                    if(employee != null)
+                        response = mapper.writeValueAsString(employee);
+                    else
+                        response = "Not found";
                     
                 } catch (NumberFormatException | JsonProcessingException e) {
                     System.err.println(e.getMessage());
@@ -87,19 +66,26 @@ public class EmployeesHandler implements HttpHandler
                 System.err.println(ex.getMessage());
             }
         }
-        else if(requestMethod.equalsIgnoreCase("put"))
+        else if(contextArray.length == 3 && requestMethod.equalsIgnoreCase("put"))
         {
             try
             {
-                controller.update(mapper.readValue(packet.getRequestBody(), Employee.class));
-                response = "Employee update";
+                Employee employee = mapper.readValue(packet.getRequestBody(), Employee.class);
+                if(Integer.parseInt(contextArray[2]) == employee.getId())
+                {
+                    controller.update(employee);
+                    response = "Employee update";
+                }
+                else
+                    response = "Id mismatch";
             } catch (IOException ex) {
                 System.err.println(ex.getMessage());
             }
         }
-        else if(requestMethod.equalsIgnoreCase("delete"))
+        else if(contextArray.length == 3 && requestMethod.equalsIgnoreCase("delete"))
         {
-            controller.delete(1);
+            controller.delete(Integer.parseInt(contextArray[2]));
+            response = "Employee delete";
         }
         
         try
@@ -114,3 +100,26 @@ public class EmployeesHandler implements HttpHandler
         }
     }
 }
+
+/*
+
+Obtener todos los registros
+GET /employees
+
+
+Obtener registro por id
+GET /employees/:id
+
+Crear un registro
+POST /employees
+
+{"id":6, "name":"Nombre"}
+
+Actualizar un registro
+PUT /employees/:id
+
+Borrar registro
+DELETE /employees/:id
+
+*/
+        

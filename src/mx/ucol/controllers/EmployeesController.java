@@ -13,13 +13,11 @@ import mx.ucol.models.Employee;
  * 
  * @author CarlosFco
  */
-
 public class EmployeesController implements Controller<Employee>
 {
     private final String controller = "com.mysql.cj.jdbc.Driver";
     private Connection connection;
     private Statement statement;
-    private String sql;
     
     public EmployeesController()
     {
@@ -43,9 +41,8 @@ public class EmployeesController implements Controller<Employee>
             result = statement.executeQuery("SELECT* FROM employees");
             
             while (result.next())
-            {
                 employees.add(new Employee(result.getInt("id"), result.getString("name")));
-            }
+            
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
@@ -55,7 +52,19 @@ public class EmployeesController implements Controller<Employee>
     @Override
     public Employee getById(int id)
     {
-        return new Employee(3, "Tres");
+        ResultSet result;
+        Employee employee = null;
+        try
+        {
+            result = statement.executeQuery("SELECT* FROM employees WHERE id = " + id);
+            
+            if(result.first())
+                employee = new Employee(result.getInt("id"), result.getString("name"));
+            
+        } catch (SQLException e){
+            System.err.println(e.getMessage());
+        }
+        return employee;
     }
     
     @Override
@@ -72,14 +81,25 @@ public class EmployeesController implements Controller<Employee>
     }
     
     @Override
-    public void update(Employee e) 
+    public void update(Employee employee)
     {
-        System.out.println("Update:" + e.getName());
+        try
+        {
+            statement.executeUpdate("UPDATE employees SET name = \"" +
+                    employee.getName() + "\" WHERE id = " + employee.getId());
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
     
     @Override
     public void delete(int id) 
     {
-        System.out.println("Delete:" + id);
+        try
+        {
+            statement.executeUpdate("DELETE FROM employees WHERE id = " + id);
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

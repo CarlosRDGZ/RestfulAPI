@@ -1,19 +1,29 @@
-<!DOCTYPE html>
+<!DOCUMENT html>
 <html>
-    <head>
-        <title>Employees</title>
-    </head>
-    <body>
-        <form>
-            <script>
-                document.write('Hola crayola');
-                
-            </script>
-            <br>
-            <button type="submit" formmethod="GET"
-                    formaction="http://localohost:3000/employees">GET</button>
-            <button type="submit" formmethod="POST"
-                    formaction="http://localohost:3000/employees">POST</button>
-        </form>
-    </body>
+  <head>
+    <title>Employees</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="Client.js"></script>
+  </head>
+  <body>
+    <div class="navbar">
+	  <div class="navbar-inner">
+	    <a class="brand" href="#">Employees</a>
+      </div>
+	</div>
+	<div id="main" class="container">
+	  <h1>Employees</h1>
+      <br>
+	</div>
+	<div id="buttons" class="container">
+	  <p id="text"><p>
+	  <form>
+	    <button type="button" onclick="getMethod()">GET</button><br><br><br>
+        <p>id </p><input id="txtId" type="number"><br>
+        <p>name </p><input id="txtName" type="text"><br>
+        <button type="button" onclick="postMethod">POST</button>
+	  </form>
+	</div>    
+  </body>
 </html>
